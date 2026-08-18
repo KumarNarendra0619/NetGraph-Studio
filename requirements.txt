@@ -1,0 +1,6 @@
+streamlit>=1.48,<2
+city2graph>=1.0.0
+geopandas>=1.1.1
+networkx>=3.0
+pyogrio>=0.10
+pyarrow>=18

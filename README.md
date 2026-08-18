@@ -6,7 +6,7 @@ NetGraph Studio provides a simple web interface for turning geospatial data into
 
 ## Core scientific principle
 
-NetGraph Studio is a **UI wrapper around the original City2Graph Python library**. It does not reimplement City2Graph graph algorithms or change their mathematical operations.
+NetGraph Studio is an **independent UI and workflow layer around the original City2Graph Python library**. It does not reimplement City2Graph graph algorithms or change their mathematical operations.
 
 ```text
 User → UI → Validation → City2Graph Adapter → Original City2Graph API → Results
@@ -36,6 +36,7 @@ The first working UI scaffold includes:
 - GeoJSON and CSV downloads
 - Research configuration record
 - Automated adapter regression tests
+- Direct City2Graph output-fidelity regression test for KNN
 - GitHub Actions test workflow
 
 ## Modes
@@ -59,17 +60,35 @@ Adds:
 - result statistics
 - algorithm-source declaration
 
-## Next locked development stages
+## Development roadmap
 
-1. Harden file validation and multi-file Shapefile handling.
-2. Add network-distance input and validation.
-3. Add morphology, mobility/OD and transportation workflows.
-4. Add heterogeneous graph workflows.
-5. Add NetworkX / PyTorch Geometric exports where supported by City2Graph.
-6. Add graph visualization and richer map rendering.
-7. Add full reproducibility report export.
-8. Run numerical regression tests against direct City2Graph calls.
-9. Prepare Streamlit deployment.
+### Stage 2 — Output Fidelity & Validation
+
+- Harden file validation and multi-file Shapefile handling.
+- Add network-distance input and validation.
+- Expand numerical regression tests against direct City2Graph calls.
+- Verify node, edge, weight, geometry and CRS fidelity for supported workflows.
+
+### Stage 3 — Extended City2Graph Workflows
+
+- Morphology workflows.
+- Mobility / OD workflows.
+- Transportation workflows.
+- Heterogeneous graph workflows.
+- NetworkX / PyTorch Geometric exports where supported by City2Graph.
+
+### Stage 4 — Visualization & Reproducibility
+
+- Rich graph visualization.
+- Richer map rendering.
+- Full reproducibility report export.
+
+### Stage 5 — Deployment
+
+- Production hardening.
+- CI/CD.
+- Streamlit deployment.
+- Release documentation.
 
 ## Output fidelity policy
 
@@ -95,7 +114,8 @@ NetGraph-Studio/
 │   ├── adapter.py
 │   └── io.py
 ├── tests/
-│   └── test_adapter.py
+│   ├── test_adapter.py
+│   └── test_fidelity.py
 ├── .streamlit/
 │   └── config.toml
 └── .github/workflows/
@@ -109,3 +129,5 @@ NetGraph Studio uses the open-source [City2Graph](https://github.com/c2g-dev/cit
 Sato, Y., Pietrostefani, E., Mahabir, R., & Arribas-Bel, D. (2026). *City2Graph: A Python library for Heterogeneous Graph Neural Networks and spatial analysis in urban systems*. Computers, Environment and Urban Systems, 130, 102492. DOI: 10.1016/j.compenvurbsys.2026.102492.
 
 City2Graph documentation: https://city2graph.net
+
+NetGraph Studio is an independent project and is not an official City2Graph product unless explicitly stated by the City2Graph maintainers.

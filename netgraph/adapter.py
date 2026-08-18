@@ -1,7 +1,7 @@
 """Thin adapter over the original City2Graph public API.
 
-This module deliberately contains no graph-building mathematics. Its job is to
-validate UI selections and call City2Graph directly.
+The adapter contains UI validation and parameter translation only. Graph construction
+is delegated directly to the original City2Graph functions.
 """
 
 from __future__ import annotations
@@ -64,17 +64,37 @@ def run_operation(
     seed: int | None = 42,
     contiguity: str = "queen",
     distance_metric: str = "euclidean",
+    network_gdf: gpd.GeoDataFrame | None = None,
+    network_weight: str | None = None,
 ):
-    """Call the selected original City2Graph public function unchanged."""
+    """Call the selected original City2Graph public function without reimplementing it."""
+    if operation_key not in OPERATIONS:
+        raise ValueError(f"Unknown graph operation: {operation_key}")
+
     operation = OPERATIONS[operation_key]
     validate_input(gdf, operation)
 
+    if distance_metric not in {"euclidean", "manhattan", "network"}:
+        raise ValueError("Unsupported distance metric.")
+    if distance_metric == "network":
+        if network_gdf is None:
+            raise ValueError("Network distance requires a network layer.")
+        if network_gdf.empty or network_gdf.crs is None:
+            raise ValueError("The network layer must contain features and have a CRS.")
+
+    common = {
+        "distance_metric": distance_metric,
+        "network_gdf": network_gdf,
+        "network_weight": network_weight,
+        "as_nx": False,
+    }
+
     if operation_key == "knn":
-        return operation.function(gdf, k=k, distance_metric=distance_metric, as_nx=False)
+        return operation.function(gdf, k=k, **common)
     if operation_key == "radius":
-        return operation.function(gdf, radius=radius, distance_metric=distance_metric, as_nx=False)
+        return operation.function(gdf, radius=radius, **common)
     if operation_key == "waxman":
-        return operation.function(gdf, beta=beta, r0=r0, seed=seed, distance_metric=distance_metric, as_nx=False)
+        return operation.function(gdf, beta=beta, r0=r0, seed=seed, **common)
     if operation_key == "contiguity":
-        return operation.function(gdf, contiguity=contiguity, distance_metric=distance_metric, as_nx=False)
-    return operation.function(gdf, distance_metric=distance_metric, as_nx=False)
+        return operation.function(gdf, contiguity=contiguity, **common)
+    return operation.function(gdf, **common)

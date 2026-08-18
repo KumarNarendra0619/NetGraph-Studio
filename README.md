@@ -14,6 +14,30 @@ User → UI → Validation → City2Graph Adapter → Original City2Graph API �
 
 The adapter exists only to translate safe UI selections into explicit City2Graph function calls.
 
+## Current MVP
+
+The first working UI scaffold includes:
+
+- Streamlit web interface
+- Simple / Research mode switch
+- GeoJSON, GeoPackage, GeoParquet and Feather input
+- Input feature, geometry and CRS summary
+- KNN
+- Delaunay
+- Gabriel
+- Relative Neighbourhood Graph
+- Minimum Spanning Tree
+- Fixed Radius
+- Waxman
+- Queen / Rook polygon contiguity
+- Euclidean / Manhattan distance selection
+- Node and edge statistics
+- Interactive point/centroid preview
+- GeoJSON and CSV downloads
+- Research configuration record
+- Automated adapter regression tests
+- GitHub Actions test workflow
+
 ## Modes
 
 ### Simple Mode
@@ -30,21 +54,22 @@ Adds:
 
 - CRS information
 - selected method and parameters
-- package/runtime metadata
-- processing log
-- reproducibility configuration
+- processing time
+- reproducibility information
 - result statistics
+- algorithm-source declaration
 
-## Planned workflow areas
+## Next locked development stages
 
-- Spatial proximity graphs
-- Contiguity graphs
-- Urban morphology
-- Street/network graphs
-- Mobility / OD graphs
-- Public transport graphs
-- Heterogeneous graphs
-- GNN-ready exports
+1. Harden file validation and multi-file Shapefile handling.
+2. Add network-distance input and validation.
+3. Add morphology, mobility/OD and transportation workflows.
+4. Add heterogeneous graph workflows.
+5. Add NetworkX / PyTorch Geometric exports where supported by City2Graph.
+6. Add graph visualization and richer map rendering.
+7. Add full reproducibility report export.
+8. Run numerical regression tests against direct City2Graph calls.
+9. Prepare Streamlit deployment.
 
 ## Output fidelity policy
 
@@ -59,18 +84,23 @@ NetGraph Studio will not silently:
 
 Validation and visualization are separate from graph computation.
 
-## Technology
+## Repository structure
 
-- Python
-- Streamlit
-- GeoPandas
-- City2Graph
-- NetworkX
-- optional PyTorch Geometric
-
-## Development status
-
-Foundation implementation in progress.
+```text
+NetGraph-Studio/
+├── app.py
+├── requirements.txt
+├── netgraph/
+│   ├── __init__.py
+│   ├── adapter.py
+│   └── io.py
+├── tests/
+│   └── test_adapter.py
+├── .streamlit/
+│   └── config.toml
+└── .github/workflows/
+    └── tests.yml
+```
 
 ## Attribution
 

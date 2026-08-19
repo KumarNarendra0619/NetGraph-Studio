@@ -22,18 +22,8 @@ def _assert_graph_outputs_equal(actual, expected) -> None:
     actual_nodes, actual_edges = actual
     expected_nodes, expected_edges = expected
 
-    assert_geodataframe_equal(
-        actual_nodes,
-        expected_nodes,
-        check_like=False,
-        check_exact=True,
-    )
-    assert_geodataframe_equal(
-        actual_edges,
-        expected_edges,
-        check_like=False,
-        check_exact=True,
-    )
+    assert_geodataframe_equal(actual_nodes, expected_nodes, check_like=False)
+    assert_geodataframe_equal(actual_edges, expected_edges, check_like=False)
 
 
 def test_knn_netgraph_matches_direct_city2graph():

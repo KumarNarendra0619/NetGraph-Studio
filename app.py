@@ -38,10 +38,13 @@ def load_layer(label: str, key: str):
 
 
 def show_result(result, *, operation: str, params: dict, input_features: int, input_crs: str | None, elapsed: float):
+    directed = bool(params.get("directed", False))
     if isinstance(result, tuple) and len(result) == 2 and hasattr(result[0], "geometry"):
         nodes_gdf, edges_gdf = result
-        graph = nx.Graph(); graph.add_nodes_from(nodes_gdf.index)
-        if isinstance(edges_gdf.index, pd.MultiIndex): graph.add_edges_from([(x[0], x[1]) for x in edges_gdf.index])
+        graph = nx.DiGraph() if directed else nx.Graph()
+        graph.add_nodes_from(nodes_gdf.index)
+        if isinstance(edges_gdf.index, pd.MultiIndex):
+            graph.add_edges_from([(x[0], x[1]) for x in edges_gdf.index])
     elif isinstance(result, tuple) and len(result) == 2 and isinstance(result[0], dict):
         nodes_gdf, edges_gdf = result; graph = nx.Graph()
         for layer in nodes_gdf.values(): graph.add_nodes_from(layer.index)
@@ -59,6 +62,8 @@ def show_result(result, *, operation: str, params: dict, input_features: int, in
         if nodes_gdf is not None and not isinstance(nodes_gdf, dict) and not nodes_gdf.empty:
             preview = nodes_gdf.copy()
             if not all(preview.geometry.geom_type.isin(["Point", "MultiPoint"])): preview["geometry"] = preview.geometry.centroid
+            if preview.crs is not None and preview.crs.to_epsg() != 4326:
+                preview = preview.to_crs(4326)
             st.map(preview, use_container_width=True)
         else: st.info("Use Data and Export for heterogeneous outputs.")
     with tab_data:
@@ -117,11 +122,13 @@ elif workflow == "Urban Morphology":
 elif workflow == "Mobility / OD":
     zones = load_layer("Zone polygons / points", "zones"); od_file = st.file_uploader("OD CSV", type=["csv"], key="od_csv")
     if zones is not None and od_file is not None:
-        od = pd.read_csv(od_file); matrix_type = st.selectbox("OD format", ["edgelist", "adjacency"]); zone_id_col = st.selectbox("Zone ID column", list(zones.columns)); params = {"zone_id_col": zone_id_col, "matrix_type": matrix_type, "as_nx": False, "directed": st.checkbox("Directed graph", True)}
+        od = pd.read_csv(od_file); matrix_type = st.selectbox("OD format", ["edgelist", "adjacency"]); zone_id_col = st.selectbox("Zone ID column", list(zones.columns)); directed = st.checkbox("Directed graph", True); params = {"zone_id_col": zone_id_col, "matrix_type": matrix_type, "as_nx": False, "directed": directed, "include_self_loops": st.checkbox("Keep self-loops", False), "compute_edge_geometry": st.checkbox("Create edge geometry", True)}
         if matrix_type == "edgelist":
             source_col = st.selectbox("Origin column", list(od.columns)); target_col = st.selectbox("Destination column", list(od.columns), index=min(1, len(od.columns)-1)); numeric = list(od.select_dtypes(include="number").columns)
             if not numeric: st.error("OD edge list needs a numeric weight column."); st.stop()
-            params.update(source_col=source_col, target_col=target_col, weight_cols=[st.selectbox("Flow / weight column", numeric)])
+            weight_col = st.selectbox("Flow / weight column", numeric); params.update(source_col=source_col, target_col=target_col, weight_cols=[weight_col])
+            params["threshold"] = st.number_input("Minimum flow threshold", min_value=0.0, value=0.0)
+            params["threshold_col"] = weight_col if params["threshold"] > 0 else None
         if st.button("🚶 Build OD Graph", type="primary", use_container_width=True):
             started = datetime.now(timezone.utc)
             try:
@@ -141,4 +148,4 @@ elif workflow == "Transportation / GTFS":
 
 else:
     st.subheader("GNN / PyTorch Geometric Export")
-    st.info("The PyG conversion adapter is installed and delegates to City2Graph. Session caching and the final PyG download control will be hardened during debugging.")
+    st.info("The PyG conversion adapter is installed and delegates to City2Graph. PyTorch/PyG remain optional for the basic deployment.")

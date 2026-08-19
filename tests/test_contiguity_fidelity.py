@@ -1,6 +1,7 @@
 """Polygon contiguity fidelity tests against City2Graph."""
 
 import geopandas as gpd
+from geopandas.testing import assert_geodataframe_equal
 from shapely.geometry import Polygon
 
 import city2graph.proximity as c2g
@@ -24,13 +25,13 @@ def test_queen_contiguity_fidelity():
     expected = c2g.contiguity_graph(gdf, contiguity="queen", as_nx=False)
     actual = run_operation(gdf, "contiguity", contiguity="queen")
     assert isinstance(actual, tuple) and len(actual) == 2
-    gpd.testing.assert_geodataframe_equal(actual[0], expected[0], check_exact=True)
-    gpd.testing.assert_geodataframe_equal(actual[1], expected[1], check_exact=True)
+    assert_geodataframe_equal(actual[0], expected[0], check_exact=True)
+    assert_geodataframe_equal(actual[1], expected[1], check_exact=True)
 
 
 def test_rook_contiguity_fidelity():
     gdf = polygons()
     expected = c2g.contiguity_graph(gdf, contiguity="rook", as_nx=False)
     actual = run_operation(gdf, "contiguity", contiguity="rook")
-    gpd.testing.assert_geodataframe_equal(actual[0], expected[0], check_exact=True)
-    gpd.testing.assert_geodataframe_equal(actual[1], expected[1], check_exact=True)
+    assert_geodataframe_equal(actual[0], expected[0], check_exact=True)
+    assert_geodataframe_equal(actual[1], expected[1], check_exact=True)

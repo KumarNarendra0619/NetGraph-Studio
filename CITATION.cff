@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use NetGraph Studio in research, please cite this software."
+title: "NetGraph Studio"
+type: software
+version: "0.1.0"
+date-released: "2026-08-19"
+repository-code: "https://github.com/KumarNarendra0619/NetGraph-Studio"
+license: "BSD-3-Clause"
+authors:
+  - family-names: "Kumar"
+    given-names: "Narendra"
+    name-suffix: "Dr."
+keywords:
+  - spatial network analysis
+  - geospatial analysis
+  - population geography
+  - urban morphology
+  - transportation geography
+  - City2Graph
+  - no-code GIS
+abstract: "NetGraph Studio is a no-code research workbench that provides a graphical interface to supported City2Graph spatial network analysis workflows."

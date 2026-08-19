@@ -29,7 +29,7 @@ def test_proximity_public_contract():
 def test_advanced_public_contract():
     required_parameters(city2graph.morphological_graph, ["buildings_gdf", "segments_gdf", "center_point", "distance", "clipping_buffer", "contiguity", "keep_buildings", "as_nx"])
     required_parameters(mobility.od_matrix_to_graph, ["od_data", "zones_gdf", "zone_id_col", "matrix_type", "source_col", "target_col", "weight_cols", "threshold", "include_self_loops", "compute_edge_geometry", "directed", "as_nx"])
-    required_parameters(transportation.travel_summary_graph, ["start_date", "end_date"])
+    required_parameters(transportation.travel_summary_graph, ["start_time", "end_time"])
 
 
 def test_city2graph_version_is_1_x():

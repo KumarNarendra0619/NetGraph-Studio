@@ -15,33 +15,45 @@ import geopandas as gpd
 import pandas as pd
 
 
-def morphology_graph(buildings: gpd.GeoDataFrame, streets: gpd.GeoDataFrame, **kwargs):
+def morphology_graph(
+    buildings: gpd.GeoDataFrame,
+    streets: gpd.GeoDataFrame,
+    center_point: gpd.GeoSeries,
+    **kwargs,
+):
     """Delegate urban morphology graph construction to City2Graph."""
-    from city2graph.morphology import morphological_graph
-    return morphological_graph(buildings, streets, **kwargs)
+    from city2graph import morphological_graph
+    return morphological_graph(
+        buildings_gdf=buildings,
+        segments_gdf=streets,
+        center_point=center_point,
+        **kwargs,
+    )
 
 
 def od_graph(od_data: pd.DataFrame, zones: gpd.GeoDataFrame, **kwargs):
     """Delegate OD/mobility graph construction to City2Graph."""
-    from city2graph.mobility import od_matrix_to_graph
+    from city2graph import od_matrix_to_graph
     return od_matrix_to_graph(od_data, zones, **kwargs)
 
 
 def gtfs_graph(gtfs_zip: bytes, **kwargs):
-    """Delegate GTFS loading to City2Graph transportation APIs."""
-    from city2graph.transportation import load_gtfs
+    """Load a GTFS feed and delegate graph construction to City2Graph."""
+    from city2graph import load_gtfs, travel_summary_graph
+
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as handle:
         handle.write(gtfs_zip)
         path = Path(handle.name)
     try:
-        return load_gtfs(path, **kwargs)
+        gtfs_data = load_gtfs(path)
+        return travel_summary_graph(gtfs_data, **kwargs)
     finally:
         path.unlink(missing_ok=True)
 
 
 def pyg_export(nodes, edges=None, **kwargs):
     """Delegate GeoDataFrame-to-PyG conversion to City2Graph."""
-    from city2graph.graph import gdf_to_pyg
+    from city2graph import gdf_to_pyg
     return gdf_to_pyg(nodes, edges, **kwargs)
 
 

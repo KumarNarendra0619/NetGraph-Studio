@@ -58,5 +58,5 @@ def test_knn_manhattan_matches_direct_city2graph():
 
 
 def test_network_distance_requires_network_layer():
-    with pytest.raises(ValueError, match="Network distance requires a non-empty network layer"):
+    with pytest.raises(ValueError, match="Network distance requires a network layer"):
         run_operation(_sample_points(), "knn", k=2, distance_metric="network")

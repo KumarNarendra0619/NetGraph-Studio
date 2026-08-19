@@ -2,9 +2,15 @@ name: NetGraph Studio tests
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - stage-2b-regression-tests
+      - stage-2c-polygon-network
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - stage-2b-regression-tests
+      - stage-2c-polygon-network
 
 jobs:
   test:

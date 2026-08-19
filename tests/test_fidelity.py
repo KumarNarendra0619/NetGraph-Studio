@@ -48,6 +48,6 @@ def test_invalid_network_metric_is_rejected_before_engine_call():
     try:
         run_operation(gdf, "knn", k=2, distance_metric="network")
     except ValueError as exc:
-        assert "Network distance requires a non-empty network layer" in str(exc)
+        assert "Network distance requires a network layer." in str(exc)
     else:
         raise AssertionError("Expected network-distance validation error")

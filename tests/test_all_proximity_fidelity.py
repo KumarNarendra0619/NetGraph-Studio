@@ -6,6 +6,7 @@ City2Graph functions. NetGraph Studio must not reimplement graph construction.
 
 import geopandas as gpd
 import pytest
+from geopandas.testing import assert_geodataframe_equal
 from shapely.geometry import Point
 
 import city2graph.proximity as c2g
@@ -24,8 +25,8 @@ def sample_points():
 def assert_equal(actual, expected):
     assert isinstance(actual, tuple) and len(actual) == 2
     assert isinstance(expected, tuple) and len(expected) == 2
-    gpd.testing.assert_geodataframe_equal(actual[0], expected[0], check_exact=True)
-    gpd.testing.assert_geodataframe_equal(actual[1], expected[1], check_exact=True)
+    assert_geodataframe_equal(actual[0], expected[0], check_exact=True)
+    assert_geodataframe_equal(actual[1], expected[1], check_exact=True)
 
 
 def test_delaunay_fidelity():

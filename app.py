@@ -16,19 +16,35 @@ st.set_page_config(page_title="NetGraph Studio", page_icon="🕸️", layout="wi
 
 st.markdown("""
 <style>
-/* NetGraph Studio: compact desktop tool styling. No scientific computation is changed. */
-.block-container { max-width: 1450px; padding-top: 1.2rem; padding-bottom: 2rem; }
-[data-testid="stSidebar"] { border-right: 1px solid rgba(128,128,128,.18); }
-[data-testid="stSidebar"] .block-container { padding-top: 1.2rem; }
-.ng-header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:14px 18px; border:1px solid rgba(128,128,128,.20); border-radius:12px; margin-bottom:14px; background:rgba(128,128,128,.045); }
-.ng-brand { font-size:1.45rem; font-weight:750; letter-spacing:-.02em; }
-.ng-sub { color:rgba(128,128,128,.95); font-size:.88rem; margin-top:2px; }
-.ng-badge { border:1px solid rgba(128,128,128,.25); border-radius:999px; padding:5px 10px; font-size:.75rem; white-space:nowrap; }
-.ng-section { font-size:.95rem; font-weight:700; margin:8px 0 8px; }
+:root { --ng-accent:#2f7cf6; --ng-accent-2:#6d5dfc; --ng-border:rgba(128,128,128,.18); }
+.block-container { max-width: 1480px; padding-top: 1rem; padding-bottom: 2rem; }
+[data-testid="stSidebar"] { border-right:1px solid var(--ng-border); }
+[data-testid="stSidebar"] .block-container { padding-top:1rem; }
+.ng-header { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px 20px; border:1px solid var(--ng-border); border-radius:16px; margin-bottom:16px; background:linear-gradient(135deg,rgba(47,124,246,.08),rgba(109,93,252,.04)); box-shadow:0 8px 30px rgba(0,0,0,.04); }
+.ng-header:after { content:""; position:absolute; inset:0 auto 0 -35%; width:35%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent); transform:skewX(-18deg); animation:ng-scan 7s ease-in-out infinite; pointer-events:none; }
+.ng-brand { font-size:1.55rem; font-weight:800; letter-spacing:-.025em; }
+.ng-sub { color:rgba(128,128,128,.95); font-size:.86rem; margin-top:3px; }
+.ng-badge { border:1px solid rgba(47,124,246,.25); border-radius:999px; padding:6px 11px; font-size:.75rem; white-space:nowrap; background:rgba(47,124,246,.07); }
+.ng-section { font-size:.92rem; font-weight:750; margin:10px 0 8px; letter-spacing:.01em; }
 .ng-help { color:rgba(128,128,128,.9); font-size:.82rem; margin:0 0 10px; }
-div[data-testid="stMetric"] { padding:10px 12px; border:1px solid rgba(128,128,128,.18); border-radius:10px; }
-.stButton > button { border-radius:8px; font-weight:650; }
-[data-testid="stFileUploader"] { border:1px dashed rgba(128,128,128,.38); border-radius:10px; padding:4px; }
+.ng-step { display:inline-flex; align-items:center; gap:7px; font-size:.73rem; font-weight:750; letter-spacing:.08em; text-transform:uppercase; color:var(--ng-accent); margin:4px 0 8px; }
+.ng-dot { width:7px; height:7px; border-radius:50%; background:var(--ng-accent); box-shadow:0 0 0 5px rgba(47,124,246,.10); animation:ng-pulse 2.2s ease-in-out infinite; }
+.ng-ready { color:#16834b; }
+.ng-ready .ng-dot { background:#16834b; box-shadow:0 0 0 5px rgba(22,131,75,.10); }
+.ng-result { border:1px solid var(--ng-border); border-radius:14px; padding:10px 14px; margin:10px 0 14px; background:rgba(128,128,128,.035); animation:ng-rise .35s ease-out both; }
+.ng-result-title { font-weight:800; }
+.ng-result-sub { color:rgba(128,128,128,.85); font-size:.78rem; }
+div[data-testid="stMetric"] { padding:11px 13px; border:1px solid var(--ng-border); border-radius:12px; background:rgba(128,128,128,.025); animation:ng-rise .35s ease-out both; }
+.stButton > button { border-radius:10px; font-weight:700; transition:transform .16s ease,box-shadow .16s ease; }
+.stButton > button:hover { transform:translateY(-1px); box-shadow:0 7px 20px rgba(47,124,246,.16); }
+[data-testid="stFileUploader"] { border:1px dashed rgba(47,124,246,.34); border-radius:12px; padding:5px; transition:border-color .2s ease,background .2s ease; }
+[data-testid="stFileUploader"]:hover { border-color:rgba(47,124,246,.7); background:rgba(47,124,246,.025); }
+[data-testid="stTabs"] button { transition:color .18s ease,transform .18s ease; }
+[data-testid="stTabs"] button:hover { transform:translateY(-1px); }
+@keyframes ng-scan { 0%,58%{left:-40%;opacity:0} 68%{opacity:1} 82%,100%{left:115%;opacity:0} }
+@keyframes ng-pulse { 0%,100%{opacity:.55;transform:scale(.9)} 50%{opacity:1;transform:scale(1.08)} }
+@keyframes ng-rise { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
 </style>
 """, unsafe_allow_html=True)
 
@@ -45,11 +61,7 @@ st.markdown("""
 with st.sidebar:
     st.markdown("### Workspace")
     mode = st.radio("Working mode", ["Simple", "Research"], horizontal=True, label_visibility="collapsed")
-    workflow = st.selectbox(
-        "Tool",
-        ["Proximity / Contiguity", "Urban Morphology", "Mobility / OD", "Transportation / GTFS", "GNN Export"],
-        help="Choose the type of graph workflow you want to run."
-    )
+    workflow = st.selectbox("Tool", ["Proximity / Contiguity", "Urban Morphology", "Mobility / OD", "Transportation / GTFS", "GNN Export"], help="Choose the type of graph workflow you want to run.")
     st.divider()
     st.markdown("**Workflow**")
     st.caption("1. Upload data  •  2. Choose method  •  3. Set parameters  •  4. Run  •  5. Export")
@@ -92,6 +104,7 @@ def show_result(result, *, operation: str, params: dict, input_features: int, in
         st.write(result)
         return
 
+    st.markdown(f'<div class="ng-result"><div class="ng-result-title">✓ {operation} complete</div><div class="ng-result-sub">City2Graph result • {elapsed:.2f} seconds • ready for inspection and export</div></div>', unsafe_allow_html=True)
     a, b, c, d = st.columns(4)
     a.metric("Nodes", f"{graph.number_of_nodes():,}")
     b.metric("Edges", f"{graph.number_of_edges():,}")
@@ -140,12 +153,26 @@ def show_result(result, *, operation: str, params: dict, input_features: int, in
         st.download_button("Download reproducibility JSON", json_bytes(record), "netgraph_analysis.json", "application/json")
 
 
+def run_with_status(label: str, fn):
+    """UI-only execution wrapper; the supplied City2Graph call is unchanged."""
+    with st.status(f"Running {label}…", expanded=False) as status:
+        started = datetime.now(timezone.utc)
+        try:
+            result = fn()
+            elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+            status.update(label="Analysis complete", state="complete", expanded=False)
+            return result, elapsed
+        except Exception:
+            status.update(label="Analysis failed", state="error", expanded=False)
+            raise
+
+
 if workflow == "Proximity / Contiguity":
+    st.markdown('<div class="ng-step"><span class="ng-dot"></span>Step 01 · Input & method</div>', unsafe_allow_html=True)
     st.markdown("### Proximity & Contiguity")
     st.markdown('<p class="ng-help">Create spatial graphs from point or polygon layers using City2Graph methods.</p>', unsafe_allow_html=True)
     gdf = load_layer("Upload spatial layer", "main_layer")
     if gdf is not None:
-        st.markdown('<div class="ng-section">1 · Choose graph method</div>', unsafe_allow_html=True)
         operation_key = st.selectbox("Graph method", list(OPERATIONS), format_func=lambda x: OPERATIONS[x].label)
         operation = OPERATIONS[operation_key]
         params = {}
@@ -161,7 +188,7 @@ if workflow == "Proximity / Contiguity":
         elif operation_key == "contiguity":
             params["contiguity"] = st.selectbox("Contiguity rule", ["queen", "rook"])
         if operation_key != "contiguity":
-            st.markdown('<div class="ng-section">2 · Distance settings</div>', unsafe_allow_html=True)
+            st.markdown('<div class="ng-step"><span class="ng-dot"></span>Step 02 · Distance settings</div>', unsafe_allow_html=True)
             params["distance_metric"] = st.selectbox("Distance metric", ["euclidean", "manhattan", "network"])
             params["network_gdf"] = None
             params["network_weight"] = None
@@ -173,24 +200,22 @@ if workflow == "Proximity / Contiguity":
                 fields = ["<geometry length>"] + [c for c in network.columns if c != network.geometry.name and network[c].dtype.kind in "biufc"]
                 choice = st.selectbox("Network weight field", fields)
                 params["network_weight"] = None if choice == "<geometry length>" else choice
-        st.markdown('<div class="ng-section">3 · Run</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ng-step"><span class="ng-dot"></span>Step 03 · Run</div>', unsafe_allow_html=True)
         if st.button("▶ Run City2Graph", type="primary", use_container_width=True):
-            started = datetime.now(timezone.utc)
             try:
-                result = run_operation(gdf, operation_key, **params)
-                elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+                result, elapsed = run_with_status(operation.label, lambda: run_operation(gdf, operation_key, **params))
                 safe = {k: "<GeoDataFrame>" if k == "network_gdf" else v for k, v in params.items()}
                 show_result(result, operation=operation.label, params=safe, input_features=len(gdf), input_crs=str(gdf.crs), elapsed=elapsed)
             except Exception as exc:
                 st.error(f"City2Graph returned an error: {exc}")
 
 elif workflow == "Urban Morphology":
+    st.markdown('<div class="ng-step"><span class="ng-dot"></span>Urban morphology workflow</div>', unsafe_allow_html=True)
     st.markdown("### Urban Morphology")
     st.markdown('<p class="ng-help">Build the heterogeneous place–movement graph from buildings and street segments.</p>', unsafe_allow_html=True)
     buildings = load_layer("Upload building polygons", "buildings")
     streets = load_layer("Upload street / movement segments", "streets")
     if buildings is not None and streets is not None:
-        st.markdown('<div class="ng-section">Analysis centre</div>', unsafe_allow_html=True)
         if buildings.crs is None:
             st.error("Buildings layer must have a CRS before morphology analysis.")
             st.stop()
@@ -199,22 +224,16 @@ elif workflow == "Urban Morphology":
         cx = c1.number_input("Centre X", value=float((bounds[0] + bounds[2]) / 2), format="%.6f")
         cy = c2.number_input("Centre Y", value=float((bounds[1] + bounds[3]) / 2), format="%.6f")
         center_point = gpd.GeoSeries([Point(cx, cy)], crs=buildings.crs)
-        params = {
-            "contiguity": st.selectbox("Place contiguity", ["queen", "rook"]),
-            "distance": st.number_input("Analysis distance", min_value=0.000001, value=500.0),
-            "clipping_buffer": st.number_input("Clipping buffer", min_value=0.0, value=300.0),
-            "keep_buildings": st.checkbox("Keep building geometries", True),
-        }
+        params = {"contiguity": st.selectbox("Place contiguity", ["queen", "rook"]), "distance": st.number_input("Analysis distance", min_value=0.000001, value=500.0), "clipping_buffer": st.number_input("Clipping buffer", min_value=0.0, value=300.0), "keep_buildings": st.checkbox("Keep building geometries", True)}
         if st.button("▶ Build Morphological Graph", type="primary", use_container_width=True):
-            started = datetime.now(timezone.utc)
             try:
-                result = morphology_graph(buildings, streets, center_point, **params)
-                elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+                result, elapsed = run_with_status("Morphological graph", lambda: morphology_graph(buildings, streets, center_point, **params))
                 show_result(result, operation="Morphological graph", params={**params, "center_point": f"({cx}, {cy})"}, input_features=len(buildings), input_crs=str(buildings.crs), elapsed=elapsed)
             except Exception as exc:
                 st.error(f"City2Graph morphology returned an error: {exc}")
 
 elif workflow == "Mobility / OD":
+    st.markdown('<div class="ng-step"><span class="ng-dot"></span>Mobility workflow</div>', unsafe_allow_html=True)
     st.markdown("### Mobility / OD")
     st.markdown('<p class="ng-help">Convert an origin–destination table into a spatial mobility graph.</p>', unsafe_allow_html=True)
     zones = load_layer("Upload zone layer", "zones")
@@ -237,15 +256,14 @@ elif workflow == "Mobility / OD":
             params["threshold"] = st.number_input("Minimum flow threshold", min_value=0.0, value=0.0)
             params["threshold_col"] = weight_col if params["threshold"] > 0 else None
         if st.button("▶ Build OD Graph", type="primary", use_container_width=True):
-            started = datetime.now(timezone.utc)
             try:
-                result = od_graph(od, zones, **params)
-                elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+                result, elapsed = run_with_status("OD / Mobility graph", lambda: od_graph(od, zones, **params))
                 show_result(result, operation="OD / Mobility graph", params=params, input_features=len(zones), input_crs=str(zones.crs), elapsed=elapsed)
             except Exception as exc:
                 st.error(f"City2Graph mobility returned an error: {exc}")
 
 elif workflow == "Transportation / GTFS":
+    st.markdown('<div class="ng-step"><span class="ng-dot"></span>Transportation workflow</div>', unsafe_allow_html=True)
     st.markdown("### Transportation / GTFS")
     st.markdown('<p class="ng-help">Upload a GTFS feed and build a travel-summary graph for a selected service period.</p>', unsafe_allow_html=True)
     gtfs = st.file_uploader("Upload GTFS ZIP feed", type=["zip"], key="gtfs")
@@ -257,15 +275,14 @@ elif workflow == "Transportation / GTFS":
             st.error("End date cannot be earlier than start date.")
             st.stop()
         if st.button("▶ Build Transit Graph", type="primary", use_container_width=True):
-            started = datetime.now(timezone.utc)
             try:
-                result = gtfs_graph(gtfs.getvalue(), calendar_start=start_date.strftime("%Y%m%d"), calendar_end=end_date.strftime("%Y%m%d"))
-                elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+                result, elapsed = run_with_status("GTFS travel-summary graph", lambda: gtfs_graph(gtfs.getvalue(), calendar_start=start_date.strftime("%Y%m%d"), calendar_end=end_date.strftime("%Y%m%d")))
                 show_result(result, operation="GTFS travel-summary graph", params={"calendar_start": start_date.strftime("%Y%m%d"), "calendar_end": end_date.strftime("%Y%m%d")}, input_features=0, input_crs=None, elapsed=elapsed)
             except Exception as exc:
                 st.error(f"City2Graph transportation returned an error: {exc}")
 
 else:
+    st.markdown('<div class="ng-step"><span class="ng-dot"></span>Advanced export</div>', unsafe_allow_html=True)
     st.markdown("### GNN / PyTorch Geometric")
     st.markdown('<p class="ng-help">Use the City2Graph PyG conversion boundary. Advanced ML dependencies remain optional for the basic deployment.</p>', unsafe_allow_html=True)
     st.info("PyTorch/PyG are intentionally separated from the basic no-code installation. Run a graph workflow first, then use the dedicated PyG adapter in an ML-enabled environment.")

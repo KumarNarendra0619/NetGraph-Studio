@@ -18,10 +18,8 @@ def _sample_points() -> gpd.GeoDataFrame:
 def _assert_graph_outputs_equal(actual, expected) -> None:
     assert isinstance(actual, tuple) and len(actual) == 2
     assert isinstance(expected, tuple) and len(expected) == 2
-
     actual_nodes, actual_edges = actual
     expected_nodes, expected_edges = expected
-
     assert_geodataframe_equal(actual_nodes, expected_nodes, check_like=False)
     assert_geodataframe_equal(actual_edges, expected_edges, check_like=False)
 
@@ -35,15 +33,8 @@ def test_knn_netgraph_matches_direct_city2graph():
         "network_weight": None,
         "as_nx": False,
     }
-
     direct = c2g.knn_graph(gdf, **kwargs)
-    through_netgraph = run_operation(
-        gdf,
-        "knn",
-        k=2,
-        distance_metric="euclidean",
-    )
-
+    through_netgraph = run_operation(gdf, "knn", k=2, distance_metric="euclidean")
     _assert_graph_outputs_equal(through_netgraph, direct)
 
 
@@ -57,6 +48,6 @@ def test_invalid_network_metric_is_rejected_before_engine_call():
     try:
         run_operation(gdf, "knn", k=2, distance_metric="network")
     except ValueError as exc:
-        assert "Network distance requires a network layer" in str(exc)
+        assert "Network distance requires a non-empty network layer" in str(exc)
     else:
         raise AssertionError("Expected network-distance validation error")

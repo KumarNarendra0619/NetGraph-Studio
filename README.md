@@ -1,107 +1,89 @@
 # NetGraph Studio
 
-**A non-coder friendly research workbench for City2Graph.**
+**A non-coder research workbench for City2Graph.**
 
-NetGraph Studio provides a simple web interface for turning geospatial data into spatial graphs without requiring users to write Python.
+NetGraph Studio provides a simple GitHub/Streamlit interface for running geospatial graph workflows without writing Python.
 
-## Core scientific principle
-
-NetGraph Studio is an **independent UI and workflow layer around the original City2Graph Python library**. It does not reimplement City2Graph graph algorithms or change their mathematical operations.
+## Locked scientific architecture
 
 ```text
-User → UI → Validation → City2Graph Adapter → Original City2Graph API → Results
+User → Simple UI → Input Validation → NetGraph Adapter → Original City2Graph API → Result → Visualization / Export
 ```
 
-The adapter exists only to translate safe UI selections into explicit City2Graph function calls.
+**The UI is not the scientific engine.** NetGraph Studio does not reimplement City2Graph algorithms, silently reproject data, change parameters, simplify geometry, or alter node/edge semantics.
 
-## Current MVP
+## Implemented workflow stages
 
-The first working UI scaffold includes:
+### 1. Proximity / Contiguity
 
-- Streamlit web interface
-- Simple / Research mode switch
-- GeoJSON, GeoPackage, GeoParquet and Feather input
-- Input feature, geometry and CRS summary
 - KNN
 - Delaunay
 - Gabriel
-- Relative Neighbourhood Graph
-- Minimum Spanning Tree
+- Relative Neighbourhood
+- Euclidean Minimum Spanning Tree
 - Fixed Radius
 - Waxman
-- Queen / Rook polygon contiguity
-- Euclidean / Manhattan distance selection
-- Node and edge statistics
-- Interactive point/centroid preview
-- GeoJSON and CSV downloads
-- Research configuration record
-- Automated adapter regression tests
-- Direct City2Graph output-fidelity regression test for KNN
-- GitHub Actions test workflow
+- Queen / Rook contiguity
+- Euclidean / Manhattan / Network distance inputs
+- Network layer + numeric weight-field selection
 
-## Modes
+### 2. Urban Morphology
 
-### Simple Mode
+A direct adapter to City2Graph's morphology workflow for building/place and movement/street layers. Heterogeneous node and edge dictionaries are retained as returned by City2Graph.
 
-```text
-Upload → Choose operation → Set parameters → Run → Result → Download
-```
+### 3. Mobility / OD
 
-Designed for GIS users, students, planners and researchers who do not want to write Python.
+A direct adapter to `od_matrix_to_graph`, supporting edge-list and adjacency-matrix workflows, zone IDs, weights, thresholds and directed/undirected configuration through the upstream API.
 
-### Research Mode
+### 4. Transportation / GTFS
 
-Adds:
+A direct adapter to the upstream GTFS transportation API. NetGraph Studio does not reconstruct the transportation algorithm.
 
-- CRS information
-- selected method and parameters
+### 5. GNN / PyG boundary
+
+The repository contains a dedicated adapter boundary for City2Graph's PyTorch Geometric conversion APIs. PyTorch/PyG remain optional and are deliberately kept outside the basic non-coder installation until final deployment hardening.
+
+## Result layer
+
+- Node and edge counts
+- Components
+- Average degree
+- Interactive map preview where spatial nodes are directly renderable
+- Node/edge tables
+- GeoJSON and CSV export
+- GraphML, GML and edge-list export
+- Research/reproducibility JSON
+- City2Graph version metadata
+
+## Research mode
+
+Research Mode records:
+
+- workflow and method
+- user-selected parameters
+- input feature count
+- input CRS
 - processing time
-- reproducibility information
-- result statistics
+- result node/edge counts
+- City2Graph version
+- UTC timestamp
 - algorithm-source declaration
 
-## Development roadmap
+## Scientific QA — intentionally deferred
 
-### Stage 2 — Output Fidelity & Validation
+As requested for this build phase, the repository now contains the QA/fidelity framework, but the final debugging campaign is intentionally deferred until all stages are assembled.
 
-- Harden file validation and multi-file Shapefile handling.
-- Add network-distance input and validation.
-- Expand numerical regression tests against direct City2Graph calls.
-- Verify node, edge, weight, geometry and CRS fidelity for supported workflows.
+The debugging campaign will compare direct City2Graph execution with NetGraph Studio execution for:
 
-### Stage 3 — Extended City2Graph Workflows
+- node IDs
+- edge pairs
+- edge attributes/weights
+- geometry
+- CRS
+- graph statistics
+- heterogeneous node/edge types
 
-- Morphology workflows.
-- Mobility / OD workflows.
-- Transportation workflows.
-- Heterogeneous graph workflows.
-- NetworkX / PyTorch Geometric exports where supported by City2Graph.
-
-### Stage 4 — Visualization & Reproducibility
-
-- Rich graph visualization.
-- Richer map rendering.
-- Full reproducibility report export.
-
-### Stage 5 — Deployment
-
-- Production hardening.
-- CI/CD.
-- Streamlit deployment.
-- Release documentation.
-
-## Output fidelity policy
-
-NetGraph Studio will not silently:
-
-- change scientific parameters
-- reproject data without disclosure
-- simplify geometries without disclosure
-- replace City2Graph algorithms
-- approximate graph construction
-- alter node/edge semantics
-
-Validation and visualization are separate from graph computation.
+The result of each comparison will be recorded as PASS/FAIL. No claim of zero defects is made before this campaign is completed.
 
 ## Repository structure
 
@@ -112,7 +94,11 @@ NetGraph-Studio/
 ├── netgraph/
 │   ├── __init__.py
 │   ├── adapter.py
-│   └── io.py
+│   ├── advanced.py
+│   ├── export.py
+│   ├── io.py
+│   ├── report.py
+│   └── validation.py
 ├── tests/
 │   ├── test_adapter.py
 │   └── test_fidelity.py
@@ -122,11 +108,15 @@ NetGraph-Studio/
     └── tests.yml
 ```
 
+## Deployment target
+
+Primary target: **GitHub + Streamlit**.
+
+The application is designed so that a non-Python user sees a controlled workflow rather than Python functions or code.
+
 ## Attribution
 
-NetGraph Studio uses the open-source [City2Graph](https://github.com/c2g-dev/city2graph) library. City2Graph is distributed under the BSD 3-Clause license. Users of City2Graph should cite:
-
-Sato, Y., Pietrostefani, E., Mahabir, R., & Arribas-Bel, D. (2026). *City2Graph: A Python library for Heterogeneous Graph Neural Networks and spatial analysis in urban systems*. Computers, Environment and Urban Systems, 130, 102492. DOI: 10.1016/j.compenvurbsys.2026.102492.
+NetGraph Studio uses the open-source [City2Graph](https://github.com/c2g-dev/city2graph) library. City2Graph is an independent upstream project. Users must comply with City2Graph's applicable license and citation requirements.
 
 City2Graph documentation: https://city2graph.net
 

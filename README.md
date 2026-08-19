@@ -14,7 +14,7 @@ User → Simple UI → Input Validation → NetGraph Adapter → Original City2G
 
 ## Upstream baseline
 
-The application is currently audited against **City2Graph 1.0.0** from the upstream repository's current `main` revision used for this build. The dependency is pinned to `city2graph==1.0.0` for reproducibility. City2Graph 1.0.0 declares Python `>=3.12,<3.15` and is licensed BSD-3-Clause.
+The application is currently audited against **City2Graph 1.0.0** from the upstream repository revision used for this build. The dependency is pinned to `city2graph==1.0.0` for reproducibility. City2Graph 1.0.0 declares Python `>=3.12,<3.15` and is licensed BSD-3-Clause.
 
 ## Implemented workflow stages
 
@@ -75,12 +75,13 @@ Research Mode records:
 
 ## Scientific QA
 
-The repository now contains both implementation and regression/fidelity coverage. The test suite includes:
+The repository contains implementation and regression/fidelity coverage. The test suite includes:
 
 - core import/startup checks
+- Streamlit entrypoint smoke test
 - dependency manifest checks
 - input and parameter validation
-- direct City2Graph fidelity tests for all proximity methods
+- direct City2Graph fidelity tests for proximity methods
 - Queen/Rook contiguity fidelity
 - export regression tests
 - reproducibility-record tests
@@ -109,6 +110,7 @@ NetGraph-Studio/
 │   ├── test_contiguity_fidelity.py
 │   ├── test_validation.py
 │   ├── test_imports.py
+│   ├── test_streamlit_smoke.py
 │   ├── test_app_smoke.py
 │   ├── test_requirements.py
 │   ├── test_export.py
@@ -116,18 +118,21 @@ NetGraph-Studio/
 │   ├── test_upstream_contract.py
 │   └── test_no_reimplementation.py
 ├── docs/
-│   └── DEBUG_STATUS.md
+│   ├── DEBUG_STATUS.md
+│   └── DEPLOY_STREAMLIT.md
 ├── .streamlit/
 │   └── config.toml
 └── .github/workflows/
     └── tests.yml
 ```
 
-## Deployment target
+## Deployment
 
-Primary target: **GitHub + Streamlit**.
+**Recommended public deployment:** GitHub + Streamlit Community Cloud.
 
-The application is designed so that a non-Python user sees a controlled workflow rather than Python functions or code.
+GitHub Pages is not the deployment target because NetGraph Studio is a Python/Streamlit application and needs a Python runtime. The step-by-step deployment guide is in [`docs/DEPLOY_STREAMLIT.md`](docs/DEPLOY_STREAMLIT.md).
+
+The public app is intended for non-coders: **Upload → Select workflow → Set parameters → Run → View → Export**.
 
 ## Attribution
 

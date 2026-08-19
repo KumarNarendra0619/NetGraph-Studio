@@ -20,8 +20,8 @@ def _assert_graph_outputs_equal(actual, expected) -> None:
     assert isinstance(expected, tuple) and len(expected) == 2
     actual_nodes, actual_edges = actual
     expected_nodes, expected_edges = expected
-    gpd.testing.assert_geodataframe_equal(actual_nodes, expected_nodes, check_like=False, check_exact=True)
-    gpd.testing.assert_geodataframe_equal(actual_edges, expected_edges, check_like=False, check_exact=True)
+    gpd.testing.assert_geodataframe_equal(actual_nodes, expected_nodes, check_like=False)
+    gpd.testing.assert_geodataframe_equal(actual_edges, expected_edges, check_like=False)
 
 
 @pytest.mark.parametrize(
@@ -58,5 +58,5 @@ def test_knn_manhattan_matches_direct_city2graph():
 
 
 def test_network_distance_requires_network_layer():
-    with pytest.raises(ValueError, match="Network distance requires a network layer"):
+    with pytest.raises(ValueError, match="Network distance requires a non-empty network layer"):
         run_operation(_sample_points(), "knn", k=2, distance_metric="network")

@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import networkx as nx
 import pandas as pd
 import streamlit as st
+from shapely.geometry import Point
 from netgraph.adapter import OPERATIONS, run_operation
 from netgraph.advanced import morphology_graph, od_graph, gtfs_graph
 from netgraph.export import graphml_bytes, gml_bytes, edge_list_bytes
@@ -103,13 +104,15 @@ if workflow == "Proximity / Contiguity":
         elif operation_key == "waxman":
             params["beta"] = st.number_input("Beta", min_value=0.000001, max_value=1.0, value=0.2); params["r0"] = st.number_input("r0", min_value=0.000001, value=1000.0); params["seed"] = st.number_input("Random seed", min_value=0, value=42)
         elif operation_key == "contiguity": params["contiguity"] = st.selectbox("Contiguity rule", ["queen", "rook"])
-        params["distance_metric"] = st.selectbox("Distance metric", ["euclidean", "manhattan", "network"]); params["network_gdf"] = None; params["network_weight"] = None
-        if params["distance_metric"] == "network":
-            network = load_layer("Choose the network layer", "network_layer")
-            if network is None: st.stop()
-            params["network_gdf"] = network
-            fields = ["<geometry length>"] + [c for c in network.columns if c != network.geometry.name and network[c].dtype.kind in "biufc"]
-            choice = st.selectbox("Network weight field", fields); params["network_weight"] = None if choice == "<geometry length>" else choice
+        if operation_key != "contiguity":
+            params["distance_metric"] = st.selectbox("Distance metric", ["euclidean", "manhattan", "network"])
+            params["network_gdf"] = None; params["network_weight"] = None
+            if params["distance_metric"] == "network":
+                network = load_layer("Choose the network layer", "network_layer")
+                if network is None: st.stop()
+                params["network_gdf"] = network
+                fields = ["<geometry length>"] + [c for c in network.columns if c != network.geometry.name and network[c].dtype.kind in "biufc"]
+                choice = st.selectbox("Network weight field", fields); params["network_weight"] = None if choice == "<geometry length>" else choice
         if st.button("🚀 Run City2Graph", type="primary", use_container_width=True):
             started = datetime.now(timezone.utc)
             try:
@@ -121,13 +124,24 @@ if workflow == "Proximity / Contiguity":
 elif workflow == "Urban Morphology":
     buildings = load_layer("Building polygons", "buildings"); streets = load_layer("Street / movement segments", "streets")
     if buildings is not None and streets is not None:
-        params = {"contiguity": st.selectbox("Place contiguity", ["queen", "rook"])}
-        distance = st.number_input("Optional network distance (0 = none)", min_value=0.0, value=0.0); params["distance"] = None if distance == 0 else distance
+        st.subheader("Analysis centre")
+        if buildings.crs is None:
+            st.error("Buildings layer must have a CRS before morphology analysis."); st.stop()
+        bounds = buildings.total_bounds
+        cx = st.number_input("Centre X", value=float((bounds[0] + bounds[2]) / 2), format="%.6f")
+        cy = st.number_input("Centre Y", value=float((bounds[1] + bounds[3]) / 2), format="%.6f")
+        center_point = gpd.GeoSeries([Point(cx, cy)], crs=buildings.crs)
+        params = {
+            "contiguity": st.selectbox("Place contiguity", ["queen", "rook"]),
+            "distance": st.number_input("Analysis distance", min_value=0.000001, value=500.0),
+            "clipping_buffer": st.number_input("Clipping buffer", min_value=0.0, value=300.0),
+            "keep_buildings": st.checkbox("Keep building geometries", True),
+        }
         if st.button("🏙️ Build Morphological Graph", type="primary", use_container_width=True):
             started = datetime.now(timezone.utc)
             try:
-                result = morphology_graph(buildings, streets, **params); elapsed = (datetime.now(timezone.utc) - started).total_seconds()
-                show_result(result, operation="Morphological graph", params=params, input_features=len(buildings), input_crs=str(buildings.crs), elapsed=elapsed)
+                result = morphology_graph(buildings, streets, center_point, **params); elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+                show_result(result, operation="Morphological graph", params={**params, "center_point": f"({cx}, {cy})"}, input_features=len(buildings), input_crs=str(buildings.crs), elapsed=elapsed)
             except Exception as exc: st.error(f"City2Graph morphology returned an error: {exc}")
 
 elif workflow == "Mobility / OD":
@@ -146,11 +160,19 @@ elif workflow == "Mobility / OD":
 
 elif workflow == "Transportation / GTFS":
     gtfs = st.file_uploader("Upload a GTFS ZIP feed", type=["zip"], key="gtfs")
-    if gtfs is not None and st.button("🚌 Load GTFS", type="primary", use_container_width=True):
-        started = datetime.now(timezone.utc)
-        try:
-            result = gtfs_graph(gtfs.getvalue()); elapsed = (datetime.now(timezone.utc) - started).total_seconds(); st.success(f"GTFS workflow completed in {elapsed:.2f} seconds."); st.write(result)
-        except Exception as exc: st.error(f"City2Graph transportation returned an error: {exc}")
+    if gtfs is not None:
+        st.subheader("Service-date filter")
+        c1, c2 = st.columns(2)
+        start_date = c1.date_input("Start date")
+        end_date = c2.date_input("End date", value=start_date)
+        if end_date < start_date:
+            st.error("End date cannot be earlier than start date."); st.stop()
+        if st.button("🚌 Build Transit Graph", type="primary", use_container_width=True):
+            started = datetime.now(timezone.utc)
+            try:
+                result = gtfs_graph(gtfs.getvalue(), calendar_start=start_date.strftime("%Y%m%d"), calendar_end=end_date.strftime("%Y%m%d")); elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+                show_result(result, operation="GTFS travel-summary graph", params={"calendar_start": start_date.strftime("%Y%m%d"), "calendar_end": end_date.strftime("%Y%m%d")}, input_features=0, input_crs=None, elapsed=elapsed)
+            except Exception as exc: st.error(f"City2Graph transportation returned an error: {exc}")
 
 else:
     st.subheader("GNN / PyTorch Geometric Export")

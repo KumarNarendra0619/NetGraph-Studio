@@ -4,6 +4,14 @@
 
 NetGraph Studio provides a simple GitHub/Streamlit interface for running geospatial graph workflows without writing Python.
 
+## License
+
+NetGraph Studio application code is released under the **BSD 3-Clause License**. Copyright (c) 2026 Dr. Narendra Kumar.
+
+NetGraph Studio uses the third-party **City2Graph** Python library, which is independently developed by Yuta Sato and City2Graph contributors and distributed under its own BSD 3-Clause License. The complete upstream notice is preserved in [`THIRD-PARTY-NOTICES`](THIRD-PARTY-NOTICES).
+
+These are separate works and separate copyright notices. NetGraph Studio does not claim ownership of City2Graph.
+
 ## Locked scientific architecture
 
 ```text
@@ -95,6 +103,8 @@ A green GitHub Actions run is still required before declaring the assembled buil
 ```text
 NetGraph-Studio/
 ├── app.py
+├── LICENSE
+├── THIRD-PARTY-NOTICES
 ├── requirements.txt
 ├── netgraph/
 │   ├── __init__.py
@@ -134,9 +144,9 @@ GitHub Pages is not the deployment target because NetGraph Studio is a Python/St
 
 The public app is intended for non-coders: **Upload → Select workflow → Set parameters → Run → View → Export**.
 
-## Attribution
+## Attribution and upstream status
 
-NetGraph Studio uses the open-source [City2Graph](https://github.com/c2g-dev/city2graph) library. City2Graph is an independent upstream project. Users must comply with City2Graph's applicable license and citation requirements.
+NetGraph Studio uses the open-source [City2Graph](https://github.com/c2g-dev/city2graph) library as a third-party dependency. City2Graph is an independent upstream project. Users must comply with City2Graph's applicable license and citation requirements.
 
 City2Graph documentation: https://city2graph.net
 

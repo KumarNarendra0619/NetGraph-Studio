@@ -1,4 +1,5 @@
 import geopandas as gpd
+from geopandas.testing import assert_geodataframe_equal
 from shapely.geometry import Point
 
 import city2graph.proximity as c2g
@@ -21,13 +22,13 @@ def _assert_graph_outputs_equal(actual, expected) -> None:
     actual_nodes, actual_edges = actual
     expected_nodes, expected_edges = expected
 
-    gpd.testing.assert_geodataframe_equal(
+    assert_geodataframe_equal(
         actual_nodes,
         expected_nodes,
         check_like=False,
         check_exact=True,
     )
-    gpd.testing.assert_geodataframe_equal(
+    assert_geodataframe_equal(
         actual_edges,
         expected_edges,
         check_like=False,
@@ -66,6 +67,6 @@ def test_invalid_network_metric_is_rejected_before_engine_call():
     try:
         run_operation(gdf, "knn", k=2, distance_metric="network")
     except ValueError as exc:
-        assert "Network distance requires a network layer" in str(exc)
+        assert "Network distance requires a non-empty network layer with a CRS." in str(exc)
     else:
         raise AssertionError("Expected network-distance validation error")
